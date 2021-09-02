@@ -7,24 +7,9 @@ function getClima() {
         dataType: 'json',
 
         success: function (data) {
-
-            console.log(data.weather[0].description);
-
-            let converterCelsius = (data.main.temp - 273.15);
-            celsius = (Math.round(converterCelsius) + "C°");
-            $('#temperatura').html(celsius);
-
-            $('#condicao').html(data.weather[0].description);
-            
-            $('#vento').html(data.wind.speed + "m/s");
-            $('#umidade').html(data.main.humidity + "%");
-
-            let icone = 'icons/' + data.weather[0].icon  + '.png';
-            $('#i_condicao').attr('src',icone);
-
-            $('#nascer').html(data.sys.sunrise);
-
-            $('#por').html(data.sys.sunset);
+            plotarResultados(data);
+            localStorage.clima = JSON.stringify(data);
+            localStorage.alteracaoCache = new Date().getTime();
         },
 
         error: function (argument) {
@@ -33,8 +18,38 @@ function getClima() {
         
     });
 }
+
+function plotarResultados(data){
+    console.log(data.weather[0].description);
+
+            let converterCelsius = (data.main.temp - 273.15);
+            celsius = (Math.round(converterCelsius) + "C°");
+            $('#temperatura').html(celsius);
+            $('#condicao').html(data.weather[0].description);
+            $('#vento').html(data.wind.speed + "m/s");
+            $('#umidade').html(data.main.humidity + "%");
+
+            let icone = 'icons/' + data.weather[0].icon  + '.png';
+            $('#i_condicao').attr('src',icone);
+            $('#nascer').html(data.sys.sunrise);
+            $('#por').html(data.sys.sunset);
+}
+
+function getDadosClima(){
+
+    let tempoAtual = new Date().getTime();
+    let tempoCache = parseInt(localStorage.alteracaoCache);
+    let diferencaTempos = tempoAtual - tempoCache;
+
+    if (diferencaTempos > 300000){
+        getClima();
+    } else {
+        let data = JSON.parse(localStorage.clima);
+        plotarResultados(data);
+    }
+
+}
+
 window.onload = function () {
-
-    getClima();
-
+    getDadosClima();
 };
